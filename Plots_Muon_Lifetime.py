@@ -33,7 +33,12 @@ def readin_values():
     i = 0
     j = 0
     data_temp = []
-    data = np.empty(n, int)
+    energy_temp = []
+    counts = np.empty(n, int)
+    energy = np.empty(n, int)
+
+    for l in range(n):
+        energy_temp.append(l)
 
     for root, directory, files in os.walk(dirName):
          for file in files:
@@ -54,16 +59,45 @@ def readin_values():
 
     f.close()
 
-    data[:] = data_temp
+    counts[:] = data_temp
+    energy[:] = energy_temp
 
-    for l in range(len(data)):
-        #print("Counts at", l, "keV :", data[l])
-        if data[l] != 0:
-            print("Counts at", l, "keV", ":", data[l])
-    return data
+    #for l in range(n):
+    #    print("Counts at", l, "keV :", data[l])
+    #    if counts[l] != 0:
+    #        print("Counts at", l, "keV", ":", data[l])
+
+    return energy, counts
+
+def plot_calibration_file():
+    dirName = r'C:\Users\Flo\Desktop\LabCourse\Muon Lifetime\data Flo and Konny'
+    
+    n = numberof_datapoints(dirName)
+
+    counts = np.empty(n, int)
+    energy = np.empty(n, int)
+
+    energy, counts = readin_values()
+
+    #for l in range(n):
+    #    print(energy[l], "keV", counts[l])
+
+    plt.errorbar(energy, counts, fmt='x', label="Calibration counts", markersize=11)
+    plt.grid()
+    plt.xlabel("Energy [keV]", fontsize=16)
+    plt.ylabel("Counts", fontsize=16)
+    plt.legend()
+
+    plt.show()
+    plt.clf()  
+
+
+    return 0
+
 
 def main():
-    readin_values()
+    #readin_values()
+    plot_calibration_file()
 
 if __name__ == '__main__':
     main()
