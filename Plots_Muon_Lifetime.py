@@ -2,6 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import csv
+import scipy.optimize
+
+def fit_func1(x, a, b):
+    
+    return a*x+b
+
+def fit_func2(x, a, b, c):
+
+    return a*np.exp(-b*x)+c
 
 def numberof_datapoints(dirName):
 
@@ -103,7 +112,7 @@ def readin_values(dirName):
     del data_temp_2
     del energy_temp
 
-    #for l in range(nonzero_bincount):
+    #for l in range(m):
     #    print("Counts at", energy[l], "keV", ":", counts[l])
     
     return energy, counts
@@ -111,12 +120,29 @@ def readin_values(dirName):
 def eval_calibration_file():
 
     dirName = r'C:\Users\Flo\Desktop\LabCourse\Muon Lifetime\calibration'
-    n = numberof_nonzero_bins(dirName)
+    m = numberof_nonzero_bins(dirName)
+    time_temp = [1,2,3,4,5,5,6,6,7,8]
+    time = np.empty(m, int)
+    k = 1
     energy, counts = readin_values(dirName)
 
-    for l in range(n):
-        if l > 0:
-            print(energy[l]-energy[l-1])
+
+    time[:] = time_temp
+    del time_temp
+
+    plt.errorbar(energy, time, fmt='x', label="Calibration data", markersize=11)
+    params, params_cov = scipy.optimize.curve_fit(fit_func1, energy, time, sigma = None, absolute_sigma = True)
+    plt.plot(energy, fit_func1(energy, params[0], params[1]), label= r"constant fit $y=ax+b$")
+    plt.grid()
+    plt.xlabel("Energy [keV]", fontsize=16)
+    plt.ylabel("Time $[\mu s]$", fontsize=16)
+    plt.legend()
+
+    perr = np.sqrt(np.diag(params_cov))/np.sqrt(len(time))
+    print("1 keV =", 1/params[0], "+/-", perr[0]/params[0], "10^(-6) s")
+
+    plt.show()
+    plt.clf()
 
     return 0
 
@@ -125,20 +151,23 @@ def eval_real_data():
     dirName = r'C:\Users\Flo\Desktop\LabCourse\Muon Lifetime\data Flo and Konny'
     energy, counts = readin_values(dirName)
 
-
-    plt.errorbar(energy, counts, fmt='x', label="Detected Muon Decays", markersize=5)
+    plt.errorbar(energy/262, counts, fmt='x', label="Detected Muon Decays", markersize=5, zorder = -1)
+    params, params_cov = scipy.optimize.curve_fit(fit_func2, energy/262, counts, sigma = None, absolute_sigma = True)
+    plt.plot(energy/262, fit_func2(energy/262, params[0], params[1], params[2]), label= r"Exponential fit $y=ae^{-bt}+c$")
     plt.grid()
-    plt.xlabel("Energy [keV]", fontsize=16)
+    plt.xlabel("Time [$\mu s$]", fontsize=16)
     plt.ylabel("Counts", fontsize=16)
     plt.legend()
+
+    perr = np.sqrt(np.diag(params_cov))/np.sqrt(len(energy))
+    print("Lifetime of Muon =", 1/params[1], "+/-", perr[1]/params[1], "10^(-6) s")
 
     plt.show()
     plt.clf() 
 
-
-
 def main():
-    #readin_values()
+    #dirName = r'C:\Users\Flo\Desktop\LabCourse\Muon Lifetime\calibration'
+    #readin_values(dirName)
     #eval_calibration_file()
     eval_real_data()
 
