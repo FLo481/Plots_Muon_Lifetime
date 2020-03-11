@@ -163,8 +163,8 @@ def eval_real_data():
     val_time, val_time_err = eval_calibration_file()
 
     plt.errorbar(energy/val_time, counts, yerr = np.sqrt(counts), xerr = np.sqrt((1/energy)**2+(val_time_err/val_time)**2)*energy/val_time, fmt='x', label="Detected Muon Decays", markersize=5, zorder = -1)
-    params, params_cov = scipy.optimize.curve_fit(fit_func2, energy/262, counts, sigma = None, absolute_sigma = True)
-    plt.plot(energy/262, fit_func2(energy/262, params[0], params[1], params[2]), label= r"Exponential fit $y=ae^{-bt}+c$")
+    params, params_cov = scipy.optimize.curve_fit(fit_func2, energy/val_time, counts, sigma = np.sqrt(counts), absolute_sigma = True)
+    plt.plot(energy/val_time, fit_func2(energy/val_time, params[0], params[1], params[2]), label= r"Exponential fit $y=ae^{-bt}+c$")
     plt.grid()
     plt.xlabel("Time [$\mu s$]", fontsize=16)
     plt.ylabel("Counts", fontsize=16)
