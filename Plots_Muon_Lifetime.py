@@ -122,36 +122,47 @@ def eval_calibration_file():
     dirName = r'C:\Users\Flo\Desktop\LabCourse\Muon Lifetime\calibration'
     m = numberof_nonzero_bins(dirName)
     time_temp = [1,2,3,4,5,5,6,6,7,8]
+    energy_err_temp = []
+    energy_err = np.empty(m, int)
     time = np.empty(m, int)
     k = 1
     energy, counts = readin_values(dirName)
 
-
+    #xerr of +/- 1keV
+    for l in range(m):
+        energy_err_temp.append(1)
+    
     time[:] = time_temp
+    energy_err[:] = energy_err_temp
     del time_temp
+    del energy_err_temp
 
-    plt.errorbar(energy, time, fmt='x', label="Calibration data", markersize=11)
+    #plt.errorbar(energy, time, yerr = None, xerr = energy_err , fmt='x', label="Calibration data", markersize=11)
     params, params_cov = scipy.optimize.curve_fit(fit_func1, energy, time, sigma = None, absolute_sigma = True)
-    plt.plot(energy, fit_func1(energy, params[0], params[1]), label= r"constant fit $y=ax+b$")
-    plt.grid()
-    plt.xlabel("Energy [keV]", fontsize=16)
-    plt.ylabel("Time $[\mu s]$", fontsize=16)
-    plt.legend()
+    #plt.plot(energy, fit_func1(energy, params[0], params[1]), label= r"constant fit $y=ax+b$")
+    #plt.grid()
+    #plt.xlabel("Energy [keV]", fontsize=16)
+    #plt.ylabel("Time $[\mu s]$", fontsize=16)
+    #plt.legend()
 
     perr = np.sqrt(np.diag(params_cov))/np.sqrt(len(time))
-    print("1 keV =", 1/params[0], "+/-", perr[0]/params[0], "10^(-6) s")
+    val_time = 1/params[0]
+    val_time_err =  perr[0]/params[0]
 
-    plt.show()
-    plt.clf()
+    #print("1 µs =", val_time, "+/-", perr[0]/params[0], "keV")
 
-    return 0
+    #plt.show()
+    #plt.clf()
+
+    return val_time, val_time_err
 
 def eval_real_data():
 
     dirName = r'C:\Users\Flo\Desktop\LabCourse\Muon Lifetime\data Flo and Konny'
     energy, counts = readin_values(dirName)
+    val_time, val_time_err = eval_calibration_file()
 
-    plt.errorbar(energy/262, counts, fmt='x', label="Detected Muon Decays", markersize=5, zorder = -1)
+    plt.errorbar(energy/val_time, counts, yerr = np.sqrt(counts), xerr = np.sqrt((1/energy)**2+(val_time_err/val_time)**2)*energy/val_time, fmt='x', label="Detected Muon Decays", markersize=5, zorder = -1)
     params, params_cov = scipy.optimize.curve_fit(fit_func2, energy/262, counts, sigma = None, absolute_sigma = True)
     plt.plot(energy/262, fit_func2(energy/262, params[0], params[1], params[2]), label= r"Exponential fit $y=ae^{-bt}+c$")
     plt.grid()
@@ -160,10 +171,10 @@ def eval_real_data():
     plt.legend()
 
     perr = np.sqrt(np.diag(params_cov))/np.sqrt(len(energy))
-    print("Lifetime of Muon =", 1/params[1], "+/-", perr[1]/params[1], "10^(-6) s")
+    print("Lifetime of Muon =", 1/params[1], "+/-", perr[1]/params[1], "µs")
 
     plt.show()
-    plt.clf() 
+    plt.clf()
 
 def main():
     #dirName = r'C:\Users\Flo\Desktop\LabCourse\Muon Lifetime\calibration'
