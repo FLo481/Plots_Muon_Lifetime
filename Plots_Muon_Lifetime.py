@@ -161,6 +161,8 @@ def eval_real_data():
     dirName = r'C:\Users\Flo\Desktop\LabCourse\Muon Lifetime\data Flo and Konny'
     energy, counts = readin_values(dirName)
     val_time, val_time_err = eval_calibration_file()
+    m = numberof_nonzero_bins(dirName)
+    fit = np.empty(m, float)
 
     plt.errorbar(energy/val_time, counts, yerr = np.sqrt(counts), xerr = np.sqrt((1/energy)**2+(val_time_err/val_time)**2)*energy/val_time, fmt='x', label="Detected Muon Decays", markersize=5, zorder = -1)
     params, params_cov = scipy.optimize.curve_fit(fit_func2, energy/val_time, counts, sigma = np.sqrt(counts), absolute_sigma = True)
@@ -172,6 +174,15 @@ def eval_real_data():
 
     perr = np.sqrt(np.diag(params_cov))/np.sqrt(len(energy))
     print("Lifetime of Muon =", 1/params[1], "+/-", perr[1]/params[1], "µs")
+
+    #calculating Chi^2
+    chi_squared_value = 0
+    fit[:] = fit_func2(energy/val_time, params[0], params[1], params[2])
+
+    for l in range(m):
+        chi_squared_value += (counts[l] - fit[l])**2/(np.sqrt(counts[l]))**2 
+
+    print("red Chi^2 =", chi_squared_value/(len(counts)-3))
 
     plt.show()
     plt.clf()
