@@ -170,10 +170,10 @@ def eval_real_data():
     plt.grid()
     plt.xlabel("Time [$\mu s$]", fontsize=16)
     plt.ylabel("Counts", fontsize=16)
-    plt.legend()
+    #plt.legend()
 
     perr = np.sqrt(np.diag(params_cov))/np.sqrt(len(energy))
-    print("Lifetime of Muon =", 1/params[1], "+/-", perr[1]/params[1], "µs")
+    print("Lifetime of Muon =", 1/params[1]*1000, "+/-", perr[1]/params[1]*1000, "ns")
 
     #calculating Chi^2
     chi_squared_value = 0
@@ -182,7 +182,10 @@ def eval_real_data():
     for l in range(m):
         chi_squared_value += (counts[l] - fit[l])**2/(np.sqrt(counts[l]))**2 
 
-    print("red Chi^2 =", chi_squared_value/(len(counts)-3))
+    print("red Chi^2 =", chi_squared_value/(m-3))
+    print("a =", params[0], "+/-", perr[0])
+    print("b =", params[1]*1000, "+/-", perr[1]*1000, "ms")
+    print("c =", params[2], "+/-", perr[2])
 
     plt.show()
     plt.clf()
