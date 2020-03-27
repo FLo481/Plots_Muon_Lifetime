@@ -163,9 +163,16 @@ def eval_real_data():
     val_time, val_time_err = eval_calibration_file()
     m = numberof_nonzero_bins(dirName)
     fit = np.empty(m, float)
+    counts_err = np.empty(m, float)
+    counts_err_temp = []
 
-    plt.errorbar(energy/val_time, counts, yerr = np.sqrt(counts), xerr = np.sqrt((1/energy)**2+(val_time_err/val_time)**2)*energy/val_time, fmt='x', label="Detected Muon Decays", markersize=5, zorder = -1)
-    params, params_cov = scipy.optimize.curve_fit(fit_func2, energy/val_time, counts, sigma = np.sqrt(counts), absolute_sigma = True)
+    for l in range(m):
+        counts_err_temp.append(counts[l]/(np.sqrt(counts[l])))
+
+    counts_err[:] = counts_err_temp
+
+    plt.errorbar(energy/val_time, counts, yerr = counts_err, xerr = np.sqrt((1/energy)**2+(val_time_err/val_time)**2)*energy/val_time, fmt='x', label="Detected Muon Decays", markersize=5, zorder = -1)
+    params, params_cov = scipy.optimize.curve_fit(fit_func2, energy/val_time, counts, sigma = counts_err, absolute_sigma = True)
     plt.plot(energy/val_time, fit_func2(energy/val_time, params[0], params[1], params[2]), label= r"Exponential fit $y=ae^{-bt}+c$")
     plt.grid()
     plt.xlabel("Time [$\mu s$]", fontsize=16)
